@@ -118,6 +118,29 @@ export function InvoiceFormModal({
   );
 
   React.useEffect(() => {
+    if (!open) return;
+
+    setProjectId(invoice?.project_id ?? presetProjectId ?? projects[0]?.id ?? "");
+    setMode(items && items.length > 0 ? "items" : "single");
+    setDraftItems(
+      items && items.length > 0
+        ? items.map((item) => ({
+            key: item.id,
+            description: item.description,
+            quantity: String(Number(item.quantity)),
+            unitAmount: Number(item.unit_amount),
+          }))
+        : [newItem()]
+    );
+    setAmount(invoice && (!items || items.length === 0) ? Number(invoice.subtotal) : 0);
+    setDiscount(Number(invoice?.discount_amount ?? 0));
+    setMandatory(invoice?.is_mandatory ?? true);
+    setMethods(
+      invoice?.payment_methods?.length ? invoice.payment_methods : ["PIX", "CREDIT_CARD", "BOLETO"]
+    );
+  }, [open, invoice, items, presetProjectId, projects]);
+
+  React.useEffect(() => {
     if (state?.ok) {
       toast.success(state.message ?? "Cobrança salva");
       onOpenChange(false);
@@ -205,21 +228,41 @@ export function InvoiceFormModal({
 
         <FieldGroup>
           <Field label="Projeto" htmlFor="project_id" error={errors.project_id} required>
-            <NativeSelect
-              id="project_id"
-              name="project_id"
-              value={projectId}
-              onChange={(event) => setProjectId(event.target.value)}
-              disabled={editing}
-              required
-            >
-              <option value="">Selecione o projeto</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name} · {project.customer_name}
-                </option>
-              ))}
-            </NativeSelect>
+            {editing ? (
+              <>
+                <input type="hidden" name="project_id" value={projectId} />
+                <Input
+                  id="project_id"
+                  readOnly
+                  disabled
+                  value={
+                    selectedProject
+                      ? `${selectedProject.name} · ${selectedProject.customer_name}`
+                      : "Projeto vinculado"
+                  }
+                  className="bg-ink-50"
+                />
+                <p className="mt-1 text-[11.5px] text-ink-500">
+                  O projeto não pode ser alterado após a emissão da cobrança.
+                </p>
+              </>
+            ) : (
+              <NativeSelect
+                id="project_id"
+                name="project_id"
+                value={projectId}
+                onChange={(event) => setProjectId(event.target.value)}
+                invalid={Boolean(errors.project_id)}
+                required
+              >
+                <option value="">Selecione o projeto</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name} · {project.customer_name}
+                  </option>
+                ))}
+              </NativeSelect>
+            )}
           </Field>
 
           <Field

@@ -75,34 +75,7 @@ export const Textarea = React.forwardRef<
 ));
 Textarea.displayName = "Textarea";
 
-export const NativeSelect = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean }
->(({ className, invalid, children, ...props }, ref) => (
-  <div className="relative">
-    <select
-      ref={ref}
-      aria-invalid={invalid || undefined}
-      className={cn(
-        base,
-        "h-9.5 cursor-pointer appearance-none px-3 pr-9 py-2",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </select>
-    <svg
-      className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-400"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden
-    >
-      <path d="m6 8 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </div>
-));
-NativeSelect.displayName = "NativeSelect";
+export { NativeSelect } from "@/components/ui/select";
 
 /** Campo monetário que trabalha em centavos e formata em tempo real. */
 export const CurrencyInput = React.forwardRef<
