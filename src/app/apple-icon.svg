@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="fd-apple" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7A73FF"/>
+      <stop offset="0.55" stop-color="#635BFF"/>
+      <stop offset="1" stop-color="#00D4B1"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="url(#fd-apple)"/>
+  <path d="M56 59h68M56 90h48M56 121h31" stroke="#fff" stroke-width="13.5" stroke-linecap="round"/>
+  <circle cx="127" cy="121" r="14.5" fill="#fff" fill-opacity="0.9"/>
+</svg>
