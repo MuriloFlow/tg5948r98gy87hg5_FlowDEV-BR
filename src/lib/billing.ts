@@ -215,7 +215,7 @@ export async function provisionCheckout(
   customer: Customer,
   project: Project
 ): Promise<PaymentLink> {
-  const base = env.appUrl;
+  const base = env.publicAppUrl;
 
   try {
     const preference = await mp.createPreference({

@@ -184,7 +184,7 @@ begin
     return v_project.status;
   end if;
 
-  select count(*), min(i.id)
+  select count(*), (min(i.id::text))::uuid
     into v_overdue, v_blocking_inv
     from invoices i
    where i.project_id = p_project_id

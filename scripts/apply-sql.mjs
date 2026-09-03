@@ -15,7 +15,7 @@ import pg from "pg";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const FILES = ["001_schema.sql", "002_functions.sql"];
+const FILES = ["001_schema.sql", "002_functions.sql", "004_storage.sql", "005_fix_min_uuid.sql"];
 if (process.argv.includes("--seed")) FILES.push("003_seed.sql");
 
 const connectionString = process.env.SUPABASE_DB_URL ?? process.env.DATABASE_URL;

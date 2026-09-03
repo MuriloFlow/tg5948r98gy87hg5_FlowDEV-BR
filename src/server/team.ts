@@ -8,6 +8,7 @@ import { assertPermission } from "@/lib/auth/guard";
 import { getSessionUser, revokeAllSessions } from "@/lib/auth/session";
 import { checkPasswordStrength, hashPassword, verifyPassword } from "@/lib/auth/password";
 import { audit } from "@/lib/audit";
+import { uploadAvatar } from "@/lib/avatar-upload";
 import { fail, ok, readForm, run, zodErrors, type ActionResult } from "./action-utils";
 import type { AdminRole, AdminUser } from "@/lib/types";
 
@@ -310,10 +311,16 @@ export async function updateOwnProfileAction(
     const self = await requireSelf();
     const f = readForm(formData);
 
+    let avatarUrl = self.avatar_url;
+    const avatarFile = formData.get("avatar");
+    if (avatarFile instanceof File && avatarFile.size > 0) {
+      avatarUrl = await uploadAvatar(self.id, avatarFile);
+    }
+
     const parsed = profileSchema.safeParse({
       name: f.str("name"),
       phone: f.optional("phone"),
-      avatar_url: f.optional("avatar_url"),
+      avatar_url: avatarUrl,
       timezone: f.str("timezone") || "America/Sao_Paulo",
     });
     if (!parsed.success) return fail("Revise os campos destacados.", zodErrors(parsed.error));

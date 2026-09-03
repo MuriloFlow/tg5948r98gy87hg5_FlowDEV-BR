@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock } from "@/components/ui/misc";
 import { requireUser, can } from "@/lib/auth/guard";
 import { db, safeQuery } from "@/lib/db";
+import { env } from "@/lib/env";
 import { formatNumber } from "@/lib/format";
 import type { ApiKey } from "@/lib/types";
 import { ApiKeysTable, type ApiKeyRow } from "./api-keys-table";
@@ -15,7 +16,6 @@ export const metadata: Metadata = { title: "API Keys" };
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
-const FALLBACK_APP_URL = "https://flowdeskbrasil.vercel.app";
 
 interface SearchParams {
   q?: string;
@@ -124,7 +124,7 @@ export default async function ApiKeysPage({
 }) {
   const user = await requireUser();
   const params = await searchParams;
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || FALLBACK_APP_URL).replace(/\/$/, "");
+  const appUrl = env.publicAppUrl;
 
   const [{ rows, total, page }, summary, projects] = await Promise.all([
     loadKeys(params),

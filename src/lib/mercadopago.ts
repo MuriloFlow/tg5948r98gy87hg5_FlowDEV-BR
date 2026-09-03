@@ -115,7 +115,7 @@ export function resolveNotificationUrl(): string | null {
   const explicit = env.mercadoPagoNotificationUrl;
   if (explicit) return isPublicHttpsUrl(explicit) ? explicit : null;
 
-  const fromApp = `${env.appUrl}/api/webhooks/mercadopago`;
+  const fromApp = `${env.publicAppUrl}/api/webhooks/mercadopago`;
   return isPublicHttpsUrl(fromApp) ? fromApp : null;
 }
 

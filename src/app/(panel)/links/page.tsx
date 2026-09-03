@@ -205,7 +205,7 @@ export default async function PaymentLinksPage({
         canWrite={can(user.role, "billing:write")}
         projects={options.projects}
         invoices={options.invoices}
-        appUrl={env.appUrl}
+        appUrl={env.publicAppUrl}
         mercadoPagoConfigured={isMercadoPagoConfigured()}
         presetProjectId={params.projeto ?? null}
       />

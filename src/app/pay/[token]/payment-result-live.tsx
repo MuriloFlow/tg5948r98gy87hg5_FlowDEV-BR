@@ -38,8 +38,7 @@ export function PaymentResultLive({
 }) {
   const { paid, payload, checking, checkNow } = usePaymentStatus(
     token,
-    variant === "success" || variant === "pending",
-    { aggressive: true }
+    variant === "success" || variant === "pending"
   );
 
   if (variant === "success" && (paid || payload?.paid)) {

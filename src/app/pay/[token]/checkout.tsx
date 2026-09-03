@@ -78,8 +78,7 @@ export function Checkout({
 
   const { paid, payload, checking, secondsSinceCheck, checkNow } = usePaymentStatus(
     token,
-    true,
-    { aggressive: Boolean(pix) }
+    Boolean(pix)
   );
 
   async function generatePix() {
@@ -241,6 +240,7 @@ export function Checkout({
                   onVerify={() => void checkNow()}
                   providerStatus={payload?.provider_status}
                   secondsSinceCheck={secondsSinceCheck}
+                  syncErrors={payload?.sync_errors}
                 />
 
                 {pix.expiresAt && (

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import * as mp from "@/lib/mercadopago";
 import { flushEventsFor } from "@/lib/billing";
+import { resetLinkSyncCooldown } from "@/lib/payment-watch";
 import type { Customer, PaymentLink } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -137,6 +138,7 @@ export async function POST(
       .single();
 
     void flushEventsFor(link.project_id);
+    resetLinkSyncCooldown(link.id);
 
     return NextResponse.json({
       payment_id: payment?.id ?? pix.id,

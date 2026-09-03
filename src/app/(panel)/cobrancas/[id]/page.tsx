@@ -150,7 +150,7 @@ export default async function InvoiceDetailPage({
         links={loaded.links}
         customer={loaded.customer}
         projects={loaded.projects}
-        appUrl={env.appUrl}
+        appUrl={env.publicAppUrl}
         canWrite={can(user.role, "billing:write")}
         mercadoPagoConfigured={isMercadoPagoConfigured()}
       />

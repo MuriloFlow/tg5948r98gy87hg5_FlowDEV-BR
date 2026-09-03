@@ -285,9 +285,9 @@ export function GatewaysClient({
             </ul>
 
             <p className="text-[12px] leading-relaxed text-ink-500">
-              A URL é derivada de <Code>NEXT_PUBLIC_APP_URL</Code>. Em produção, confirme que ela
-              aponta para o domínio público — o Mercado Pago não entrega notificações em
-              <Code>localhost</Code>.
+              A URL pública é <Code>{webhookUrl}</Code>. Links de cobrança e webhooks usam{" "}
+              <Code>NEXT_PUBLIC_PUBLIC_URL</Code> (ou o domínio de produção) — nunca{" "}
+              <Code>localhost</Code>, que o Mercado Pago não alcança.
             </p>
           </CardContent>
         </Card>

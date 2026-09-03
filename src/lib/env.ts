@@ -1,5 +1,7 @@
 import "server-only";
 
+import { resolveAppUrl, resolvePublicAppUrl } from "./public-url";
+
 function optional(name: string, fallback = ""): string {
   return process.env[name] ?? fallback;
 }
@@ -18,12 +20,13 @@ export const env = {
   get supabaseServiceKey() {
     return optional("SUPABASE_SERVICE_ROLE_KEY");
   },
+  /** URL de runtime (painel aberto no browser, redirects internos). */
   get appUrl() {
-    const explicit = optional("NEXT_PUBLIC_APP_URL");
-    if (explicit) return explicit.replace(/\/$/, "");
-    const vercel = optional("VERCEL_PROJECT_PRODUCTION_URL") || optional("VERCEL_URL");
-    if (vercel) return `https://${vercel}`;
-    return "http://localhost:3000";
+    return resolveAppUrl();
+  },
+  /** URL pública para links enviados a clientes — nunca localhost por padrão. */
+  get publicAppUrl() {
+    return resolvePublicAppUrl();
   },
   get sessionSecret() {
     return (
@@ -57,3 +60,5 @@ export function isDatabaseConfigured(): boolean {
 export function isMercadoPagoConfigured(): boolean {
   return Boolean(env.mercadoPagoAccessToken);
 }
+
+export { resolveAppUrl, resolvePublicAppUrl, publicPayUrl } from "./public-url";

@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { publicPayUrl } from "@/lib/public-url";
 import type {
   Invoice,
   InvoiceFull,
@@ -8,7 +8,7 @@ import type {
 } from "@/lib/types";
 
 export function publicUrlForLink(token: string): string {
-  return `${env.appUrl}/pay/${token}`;
+  return publicPayUrl(token);
 }
 
 export function serializeCharge(invoice: Invoice | InvoiceFull) {

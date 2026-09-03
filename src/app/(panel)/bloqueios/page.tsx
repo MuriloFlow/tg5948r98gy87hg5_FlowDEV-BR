@@ -4,14 +4,13 @@ import { PageHeader } from "@/components/panel/page-header";
 import { StatCard, StatGrid } from "@/components/panel/stat-card";
 import { requireUser, can } from "@/lib/auth/guard";
 import { db, safeQuery } from "@/lib/db";
+import { env } from "@/lib/env";
 import { formatCurrency } from "@/lib/format";
 import type { ProjectEntitlement } from "@/lib/types";
 import { AccessClient } from "./access-client";
 
 export const metadata: Metadata = { title: "Controle de acesso" };
 export const dynamic = "force-dynamic";
-
-const FALLBACK_APP_URL = "https://flowdeskbrasil.vercel.app";
 
 interface SearchParams {
   q?: string;
@@ -62,7 +61,7 @@ export default async function AccessControlPage({
 }) {
   const user = await requireUser();
   const params = await searchParams;
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || FALLBACK_APP_URL).replace(/\/$/, "");
+  const appUrl = env.publicAppUrl;
 
   const rows = await loadEntitlements(params);
 

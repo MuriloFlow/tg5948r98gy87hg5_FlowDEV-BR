@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/panel/page-header";
 import { StatusBadge } from "@/components/ui/badge";
 import { requireUser, can } from "@/lib/auth/guard";
 import { db, safeQuery } from "@/lib/db";
+import { env } from "@/lib/env";
 import { projectStatusMeta } from "@/lib/labels";
 import type {
   ActivityEntry,
@@ -25,8 +26,6 @@ import type { CompanyOption, CustomerOption } from "../project-form";
 
 export const metadata: Metadata = { title: "Projeto" };
 export const dynamic = "force-dynamic";
-
-const FALLBACK_APP_URL = "https://flowdeskbrasil.vercel.app";
 
 async function loadProject(id: string): Promise<Project | null> {
   return safeQuery(async () => {
@@ -196,7 +195,7 @@ export default async function ProjectDetailPage({
 }) {
   const user = await requireUser();
   const { id } = await params;
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || FALLBACK_APP_URL).replace(/\/$/, "");
+  const appUrl = env.publicAppUrl;
 
   const project = await loadProject(id);
   if (!project) notFound();

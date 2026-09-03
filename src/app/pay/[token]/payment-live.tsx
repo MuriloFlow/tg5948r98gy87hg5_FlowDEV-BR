@@ -24,7 +24,13 @@ export interface PaymentStatusPayload {
   synced?: boolean;
   provider_status?: string | null;
   sync_errors?: string[];
+  provider_checked?: boolean;
 }
+
+/** Rede de segurança caso o stream de eventos seja bloqueado por proxy. */
+const FALLBACK_POLL_MS = 4_000;
+/** Tempo sem notícias do stream antes de acionar o polling de reserva. */
+const STREAM_STALE_MS = 8_000;
 
 const PROVIDER_LABEL: Record<string, string> = {
   pending: "Aguardando pagamento",
@@ -35,20 +41,25 @@ const PROVIDER_LABEL: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
-export function usePaymentStatus(
-  token: string,
-  enabled: boolean,
-  options?: { intervalMs?: number; aggressive?: boolean }
-) {
-  const intervalMs = options?.intervalMs ?? (options?.aggressive ? 600 : 1500);
+export function usePaymentStatus(token: string, enabled: boolean) {
   const [payload, setPayload] = React.useState<PaymentStatusPayload | null>(null);
   const [checking, setChecking] = React.useState(false);
   const [lastCheckedAt, setLastCheckedAt] = React.useState<number | null>(null);
   const [secondsSinceCheck, setSecondsSinceCheck] = React.useState<number | null>(null);
+  const [visible, setVisible] = React.useState(true);
+
+  const paid = payload?.paid === true;
+  const lastEventAt = React.useRef(0);
+
+  const apply = React.useCallback((data: PaymentStatusPayload) => {
+    lastEventAt.current = Date.now();
+    setPayload(data);
+    setLastCheckedAt(Date.now());
+  }, []);
 
   const check = React.useCallback(
     async (force = false) => {
-      setChecking(true);
+      if (force) setChecking(true);
       try {
         const endpoint = force
           ? `/api/public/pay/${token}/sync`
@@ -59,16 +70,15 @@ export function usePaymentStatus(
         });
         if (!response.ok) return null;
         const data = (await response.json()) as PaymentStatusPayload;
-        setPayload(data);
-        setLastCheckedAt(Date.now());
+        apply(data);
         return data;
       } catch {
         return null;
       } finally {
-        setChecking(false);
+        if (force) setChecking(false);
       }
     },
-    [token]
+    [apply, token]
   );
 
   React.useEffect(() => {
@@ -90,34 +100,48 @@ export function usePaymentStatus(
   }, [lastCheckedAt]);
 
   React.useEffect(() => {
-    if (!enabled) return;
+    const onVisible = () => setVisible(document.visibilityState === "visible");
+    onVisible();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
+  // Canal principal: o servidor empurra a confirmação assim que ela acontece.
+  React.useEffect(() => {
+    if (!enabled || !visible || paid || typeof EventSource === "undefined") return;
+
+    const source = new EventSource(`/api/public/pay/${token}/stream`);
+
+    source.addEventListener("status", (event) => {
+      try {
+        apply(JSON.parse((event as MessageEvent).data) as PaymentStatusPayload);
+      } catch {
+        // payload malformado — o polling de reserva cobre o caso
+      }
+    });
+
+    source.addEventListener("failed", () => source.close());
+
+    return () => source.close();
+  }, [apply, enabled, paid, token, visible]);
+
+  // Reserva: só dispara quando o stream fica em silêncio (proxy bloqueando SSE).
+  React.useEffect(() => {
+    if (!enabled || !visible || paid) return;
 
     const timeoutId = window.setTimeout(() => void check(), 0);
-
-    const tick = () => {
-      void check();
-    };
-
-    const interval = window.setInterval(tick, intervalMs);
-
-    const onFocus = () => void check(true);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void check(true);
-    };
-
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisible);
+    const interval = window.setInterval(() => {
+      if (Date.now() - lastEventAt.current > STREAM_STALE_MS) void check();
+    }, FALLBACK_POLL_MS);
 
     return () => {
       clearTimeout(timeoutId);
       clearInterval(interval);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [check, enabled, intervalMs]);
+  }, [check, enabled, paid, visible]);
 
   return {
-    paid: payload?.paid === true,
+    paid,
     payload,
     checking,
     lastCheckedAt,
@@ -131,12 +155,14 @@ export function PaymentWaitingBanner({
   onVerify,
   providerStatus,
   secondsSinceCheck,
+  syncErrors,
   compact,
 }: {
   checking: boolean;
   onVerify: () => void;
   providerStatus?: string | null;
   secondsSinceCheck?: number | null;
+  syncErrors?: string[];
   compact?: boolean;
 }) {
   const providerLabel = providerStatus
@@ -151,24 +177,25 @@ export function PaymentWaitingBanner({
       )}
     >
       <div className="flex items-center justify-center gap-2 text-[13px] font-medium text-brand-700">
-        {checking ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <span className="relative flex size-2.5">
-            <span className="absolute inline-flex size-full rounded-full bg-brand-400 opacity-75 animate-ping" />
-            <span className="relative inline-flex size-2.5 rounded-full bg-brand-500" />
-          </span>
-        )}
-        Verificando pagamento em tempo real...
+        <span className="relative flex size-2.5">
+          <span className="absolute inline-flex size-full rounded-full bg-brand-400 opacity-75 animate-ping" />
+          <span className="relative inline-flex size-2.5 rounded-full bg-brand-500" />
+        </span>
+        Aguardando confirmação do Pix
       </div>
       <p className="mt-1.5 text-center text-[12px] leading-relaxed text-ink-500">
         {providerLabel
-          ? `${providerLabel}. Assim que o banco confirmar, esta tela atualiza automaticamente.`
-          : "Assim que o banco confirmar, esta tela atualiza sozinha — geralmente em poucos segundos no Pix."}
+          ? `${providerLabel}. Assim que o banco confirmar, esta tela atualiza sozinha.`
+          : "O sistema monitora o pagamento automaticamente — geralmente em poucos segundos."}
       </p>
       {secondsSinceCheck != null && (
         <p className="mt-1 text-center text-[11px] text-ink-400">
-          Última verificação há {secondsSinceCheck === 0 ? "instantes" : `${secondsSinceCheck}s`}
+          Atualizado há {secondsSinceCheck === 0 ? "instantes" : `${secondsSinceCheck}s`}
+        </p>
+      )}
+      {syncErrors && syncErrors.length > 0 && (
+        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11.5px] leading-relaxed text-amber-800">
+          Falha ao consultar o gateway: {syncErrors[0]}
         </p>
       )}
       <Button

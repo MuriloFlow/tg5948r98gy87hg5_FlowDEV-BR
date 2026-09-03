@@ -14,7 +14,7 @@ export default function DocumentacaoPage() {
         description="Referência completa da API REST do FlowDesk: autenticação por chave, cobranças, payment links, entitlement e webhooks assinados."
         meta={<Badge tone="violet" size="sm">v1</Badge>}
       />
-      <DocsClient baseUrl={env.appUrl} sampleKey="fd_live_sk_xxxxxxxxxxxxxxxxxxxxxxxx" />
+      <DocsClient baseUrl={env.publicAppUrl} sampleKey="fd_live_sk_xxxxxxxxxxxxxxxxxxxxxxxx" />
     </>
   );
 }

@@ -244,8 +244,8 @@ export function LinksTable({
                     </TD>
                     <TD>
                       <span className="flex items-center gap-1">
-                        <code className="max-w-[190px] truncate rounded-md bg-ink-100 px-2 py-1 font-mono text-[11.5px] text-ink-700">
-                          /pay/{link.token}
+                        <code className="max-w-[240px] truncate rounded-md bg-ink-100 px-2 py-1 font-mono text-[11.5px] text-ink-700">
+                          {url}
                         </code>
                         <CopyButton value={url} label="Copiar URL" />
                         <Button variant="ghost" size="iconXs" aria-label="Abrir link" asChild>

@@ -207,7 +207,7 @@ export default async function InvoicesPage({
         canWrite={canWrite}
         projects={options.projects}
         customers={options.customers}
-        appUrl={env.appUrl}
+        appUrl={env.publicAppUrl}
         autoOpenNew={canWrite && params.novo === "1"}
         presetProjectId={params.projeto ?? null}
       />

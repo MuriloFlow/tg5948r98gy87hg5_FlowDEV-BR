@@ -14,7 +14,9 @@ import {
   Save,
   ShieldCheck,
   Smartphone,
+  Upload,
   UserCog,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge, StatusBadge } from "@/components/ui/badge";
@@ -208,6 +210,10 @@ export function SettingsClient({
 
 function ProfileTab({ profile }: { profile: UserProfile }) {
   const router = useRouter();
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const [pendingAvatarPreview, setPendingAvatarPreview] = React.useState<string | null>(null);
+  const [avatarFileName, setAvatarFileName] = React.useState<string | null>(null);
+  const avatarPreview = pendingAvatarPreview ?? profile.avatar_url;
 
   const [profileState, profileAction, profilePending] = useActionState<
     ActionResult<AdminUser> | null,
@@ -242,12 +248,53 @@ function ProfileTab({ profile }: { profile: UserProfile }) {
   React.useEffect(() => {
     if (profileState?.ok) {
       toast.success(profileState.message ?? "Perfil atualizado");
+      setTimeout(() => {
+        setPendingAvatarPreview(null);
+        setAvatarFileName(null);
+      }, 0);
       router.refresh();
     } else if (profileState?.error) {
       toast.error(profileState.error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileState]);
+
+  React.useEffect(() => {
+    return () => {
+      if (pendingAvatarPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(pendingAvatarPreview);
+      }
+    };
+  }, [pendingAvatarPreview]);
+
+  function onAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 2 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem (JPG, PNG, WebP ou GIF).");
+      event.target.value = "";
+      return;
+    }
+
+    setPendingAvatarPreview(URL.createObjectURL(file));
+    setAvatarFileName(file.name);
+  }
+
+  function clearAvatarSelection() {
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+    if (pendingAvatarPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(pendingAvatarPreview);
+    }
+    setPendingAvatarPreview(null);
+    setAvatarFileName(null);
+  }
 
   const profileErrors = profileState?.fieldErrors ?? {};
   const passwordErrors = passwordState?.fieldErrors ?? {};
@@ -257,7 +304,7 @@ function ProfileTab({ profile }: { profile: UserProfile }) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Avatar name={profile.name} src={profile.avatar_url} size="lg" />
+            <Avatar name={profile.name} src={avatarPreview} size="lg" />
             <div className="space-y-1">
               <CardTitle>{profile.name}</CardTitle>
               <div className="flex items-center gap-2">
@@ -275,6 +322,50 @@ function ProfileTab({ profile }: { profile: UserProfile }) {
         <CardContent>
           <form action={profileAction} className="space-y-5">
             <FormError message={profileState?.error} />
+
+            <Field
+              label="Foto de perfil"
+              htmlFor="avatar"
+              error={profileErrors.avatar}
+              hint="JPG, PNG, WebP ou GIF · até 2 MB"
+            >
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  ref={avatarInputRef}
+                  id="avatar"
+                  name="avatar"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="sr-only"
+                  onChange={onAvatarChange}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  icon={<Upload />}
+                  onClick={() => avatarInputRef.current?.click()}
+                >
+                  Escolher imagem
+                </Button>
+                {avatarFileName && (
+                  <>
+                    <span className="max-w-[220px] truncate text-[12.5px] text-ink-600">
+                      {avatarFileName}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      icon={<X />}
+                      onClick={clearAvatarSelection}
+                    >
+                      Remover seleção
+                    </Button>
+                  </>
+                )}
+              </div>
+            </Field>
 
             <FieldGroup>
               <Field label="Nome" htmlFor="name" error={profileErrors.name} required>
@@ -304,20 +395,6 @@ function ProfileTab({ profile }: { profile: UserProfile }) {
                 </NativeSelect>
               </Field>
             </FieldGroup>
-
-            <Field
-              label="URL do avatar"
-              htmlFor="avatar_url"
-              error={profileErrors.avatar_url}
-              hint="Endereço público de uma imagem quadrada"
-            >
-              <Input
-                id="avatar_url"
-                name="avatar_url"
-                defaultValue={profile.avatar_url ?? ""}
-                placeholder="https://..."
-              />
-            </Field>
 
             <div className="flex justify-end">
               <Button type="submit" loading={profilePending} icon={<Save />}>

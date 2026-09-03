@@ -2,7 +2,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { apiHandler, optionsResponse, pagination } from "@/lib/api/handler";
 import { Errors } from "@/lib/api/errors";
-import { listEnvelope, serializeCharge } from "@/lib/api/serializers";
+import { listEnvelope, serializeCharge, publicUrlForLink } from "@/lib/api/serializers";
 import { createInvoice, ensurePaymentLink } from "@/lib/billing";
 import type { InvoiceFull } from "@/lib/types";
 
@@ -105,7 +105,7 @@ export const POST = apiHandler(
       try {
         const link = await ensurePaymentLink(invoice.id, { createdVia: "API" });
         checkoutUrl = link.checkout_url;
-        paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/pay/${link.token}`;
+        paymentUrl = publicUrlForLink(link.token);
       } catch (error) {
         console.warn("[flowdesk-api] link não criado:", (error as Error).message);
       }

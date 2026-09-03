@@ -71,7 +71,7 @@ export default async function GatewaysPage() {
       />
 
       <GatewaysClient
-        appUrl={env.appUrl}
+        appUrl={env.publicAppUrl}
         tokenConfigured={configured}
         webhookSecretConfigured={Boolean(env.mercadoPagoWebhookSecret)}
         publicKeyConfigured={Boolean(env.mercadoPagoPublicKey)}
