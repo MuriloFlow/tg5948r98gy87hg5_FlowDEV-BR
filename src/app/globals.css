@@ -1,0 +1,259 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   FlowDesk — Design System
+   Paleta clara, tipografia densa e gradientes quase imperceptíveis.
+   ========================================================================== */
+
+@theme {
+  --color-brand-50: #f2f1ff;
+  --color-brand-100: #e7e5ff;
+  --color-brand-200: #d1ceff;
+  --color-brand-300: #b3adff;
+  --color-brand-400: #8f85ff;
+  --color-brand-500: #635bff;
+  --color-brand-600: #5546e8;
+  --color-brand-700: #4536c4;
+  --color-brand-800: #3a2fa0;
+  --color-brand-900: #322b7f;
+
+  --color-ink-50: #f6f9fc;
+  --color-ink-100: #eef2f7;
+  --color-ink-200: #e3e8ee;
+  --color-ink-300: #c1c9d2;
+  --color-ink-400: #8792a2;
+  --color-ink-500: #697386;
+  --color-ink-600: #4f566b;
+  --color-ink-700: #3c4257;
+  --color-ink-800: #2a2f45;
+  --color-ink-900: #0a2540;
+
+  --color-mint-500: #00d4b1;
+  --color-mint-600: #00b89a;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono-code), ui-monospace, "SF Mono", "JetBrains Mono",
+    Menlo, Consolas, monospace;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --shadow-xs: 0 1px 2px 0 rgb(10 37 64 / 0.04);
+  --shadow-card: 0 1px 1px rgb(10 37 64 / 0.03), 0 2px 6px rgb(10 37 64 / 0.04);
+  --shadow-raised: 0 2px 4px rgb(10 37 64 / 0.05), 0 12px 28px -8px rgb(10 37 64 / 0.12);
+  --shadow-pop: 0 4px 8px rgb(10 37 64 / 0.06), 0 24px 48px -12px rgb(10 37 64 / 0.18);
+
+  --animate-fade-in: fade-in 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(1.35); }
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: var(--color-ink-200);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand-500) 18%, transparent);
+    color: var(--color-ink-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-brand-500) 60%, transparent);
+    outline-offset: 2px;
+  }
+
+  /* números tabulares em tabelas financeiras */
+  table, .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbars discretas
+   -------------------------------------------------------------------------- */
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-300) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-ink-200);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background-color: var(--color-ink-300);
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradientes "que você quase não percebe" — assinatura visual do painel */
+  .surface-app {
+    background-color: #fbfcfe;
+    background-image:
+      radial-gradient(1200px 600px at 8% -8%, rgb(99 91 255 / 0.055), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgb(0 212 177 / 0.045), transparent 55%),
+      linear-gradient(180deg, rgb(246 249 252 / 0.9) 0%, rgb(255 255 255 / 1) 38%);
+  }
+
+  .surface-panel {
+    background-color: #ffffff;
+    background-image: linear-gradient(180deg, rgb(246 249 252 / 0.55) 0%, rgb(255 255 255 / 0) 120px);
+  }
+
+  .surface-auth {
+    background-color: #f6f9fc;
+    background-image:
+      radial-gradient(800px 420px at 12% 4%, rgb(99 91 255 / 0.13), transparent 58%),
+      radial-gradient(700px 400px at 88% 96%, rgb(0 212 177 / 0.12), transparent 58%),
+      radial-gradient(600px 300px at 70% 10%, rgb(255 138 199 / 0.08), transparent 60%);
+  }
+
+  .hairline {
+    box-shadow: inset 0 -1px 0 0 var(--color-ink-200);
+  }
+
+  .card-surface {
+    background-color: #ffffff;
+    border: 1px solid var(--color-ink-200);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+  }
+
+  .text-gradient-brand {
+    background-image: linear-gradient(92deg, var(--color-ink-900) 0%, var(--color-brand-600) 55%, var(--color-mint-600) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .grid-pattern {
+    background-image:
+      linear-gradient(to right, rgb(10 37 64 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(10 37 64 / 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-ink-100) 0%,
+      var(--color-ink-50) 40%,
+      var(--color-ink-100) 80%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  .animate-fade-in { animation: var(--animate-fade-in); }
+  .animate-slide-up { animation: var(--animate-slide-up); }
+  .animate-scale-in { animation: var(--animate-scale-in); }
+
+  /* atraso escalonado para listas */
+  .stagger > * { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .stagger > *:nth-child(1) { animation-delay: 0.02s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.08s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.11s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.14s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.17s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.2s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.23s; }
+}
+
+/* --------------------------------------------------------------------------
+   Acessibilidade — respeita quem prefere menos movimento
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Impressão de faturas
+   -------------------------------------------------------------------------- */
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+}
